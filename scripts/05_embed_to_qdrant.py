@@ -1,8 +1,15 @@
-# scripts/05_embed_to_qdrant.py
 import requests
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 import os
+
+# Load .env file manually
+if os.path.exists(".env"):
+    with open(".env") as f:
+        for line in f:
+            if "=" in line and not line.startswith("#"):
+                key, val = line.strip().split("=", 1)
+                os.environ[key.strip()] = val.strip()
 
 EMBED_URL = os.environ["EMBED_NGROK_URL"]
 qdrant = QdrantClient(host="localhost", port=6333)

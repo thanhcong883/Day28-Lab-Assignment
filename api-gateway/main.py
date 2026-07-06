@@ -1,5 +1,5 @@
 # api-gateway/main.py
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from prometheus_fastapi_instrumentator import Instrumentator
 import httpx, os, time
 
@@ -11,7 +11,14 @@ QDRANT_URL = os.environ.get("QDRANT_URL", "http://qdrant:6333")
 
 @app.post("/api/v1/chat")
 async def chat(request: Request):
-    body = await request.json()
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON")
+
+    if not body or "query" not in body:
+        raise HTTPException(status_code=422, detail="Missing 'query' field")
+
     query = body["query"]
     start = time.time()
 

@@ -18,7 +18,10 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
   # ── Prefect ───────────────────────────────────────────────
@@ -33,7 +36,8 @@ services:
   prefect-worker:
     image: prefecthq/prefect:2.14.0-python3.10
     command: >
-      sh -c "prefect work-pool create --type process lab28-worker 2>/dev/null || true
+      sh -c "pip install --no-cache-dir -r /opt/prefect/flows/requirements.txt
+      && prefect work-pool create --type process lab28-worker 2>/dev/null || true
       && prefect worker start -p lab28-worker -n lab28-worker"
     environment:
       PREFECT_API_URL: http://prefect-orion:4200/api
